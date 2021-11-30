@@ -13,73 +13,85 @@ const EMPTY: &str = "  ";
 struct Coord(usize, usize);
 
 enum Square{
-    EMPTY,
-    APPLE,
-    HEAD,
-    BODY,
+    Empty,
+    Apple,
+    Head,
+    Body,
+}
+
+enum Heading{
+    Down,
+    Up,
+    Right,
+    Left,
 }
 
 struct GameInfo{
     apple: Coord,
     head: Coord,
     body: VecDeque<Coord>,
-    pop: HashMap<Coord, Square>,  
+    pop: HashMap<Coord, Square>,
+    facing: Heading,  
 }
 
+//main game loop.
 fn main() {
     let h: usize = 10;
     let w: usize = 10;
     
+    let mut game = generate_initial_board(h, w);
+
+    print_board(h, w, game);
+}
+
+//Initial board generation.
+//Positions the player in the top left and the apple in the bottom right.
+fn generate_initial_board(h: usize, w: usize) -> GameInfo { 
     let mut game = GameInfo{
         apple: Coord(w - 2, h - 2),
         head: Coord(1, 1),
         body: VecDeque::new(),
         pop: HashMap::new(),
+        facing: Heading::Right,
     };
 
-    game.pop.insert(Coord(1,1), Square::HEAD);
-    game.pop.insert(Coord(w-2, h-2), Square::APPLE);
+    game.pop.insert(Coord(1,1), Square::Head);
+    game.pop.insert(Coord(w-2, h-2), Square::Apple);
 
-    print_board(h, w, game);
+    return game;
 }
 
+//Given the information about the game, prints the board in ascii to stdout.
 fn print_board(height: usize, width: usize, game: GameInfo){
-    let top = HASH.repeat(width);
-    
-    println!("{}", top);
+    let top_bound = HASH.repeat(width);
 
-    let mut i = 1;
-    while i < (height-1) {
-        let mut j = 0;
-        let mut lin = "".to_owned();
+    for i in 0..height {
+        if i == 0 || i == (height-1) {
+            println!("{}", top_bound);
+        } else {
+            let mut lin = "".to_owned();
 
-        while j < width {
-            let sq_char: &str;
+            for j in 0..width {
+                let sq_char: &str;
 
-            if j == 0 || j == (width - 1){
-                sq_char = HASH;
-            } else {
-                let c = Coord(j,i);
+                if j == 0 || j == (width - 1){
+                    sq_char = HASH;
+                } else {
+                    let c = Coord(j,i);
 
-                match game.pop.get(&c){
-                    Some(Square::EMPTY) => sq_char = EMPTY,
-                    Some(Square::BODY) => sq_char = BODY,
-                    Some(Square::HEAD) => sq_char = HEAD,
-                    Some(Square::APPLE) => sq_char = APPLE,
-                    None => sq_char = EMPTY,
+                    match game.pop.get(&c){
+                        Some(Square::Empty) => sq_char = EMPTY,
+                        Some(Square::Body) => sq_char = BODY,
+                        Some(Square::Head) => sq_char = HEAD,
+                        Some(Square::Apple) => sq_char = APPLE,
+                        None => sq_char = EMPTY,
+                    }
                 }
 
+                lin.push_str(sq_char);
             }
 
-            lin.push_str(sq_char);
-            
-            j += 1;
+            println!("{}", lin);
         }
-
-        println!("{}", lin);
-
-        i += 1;
     }
-
-    println!("{}", top);
 }
