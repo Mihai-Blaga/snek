@@ -9,6 +9,11 @@ const HEAD: &str = "@ ";
 const BODY: &str = "o ";
 const EMPTY: &str = "  ";
 
+const RIGHT: &str = "> ";
+const DOWN: &str = "v ";
+const LEFT: &str = "< ";
+const UP: &str = "^ ";
+
 //Top left playable square is (0, 0)
 //Bottom right playable square is (w-2, h-2) 
 #[derive(PartialEq, Eq, Hash, Copy, Clone)]
@@ -125,12 +130,12 @@ fn generate_initial_board(w: usize, h: usize) -> GameInfo {
         head: Coord(1, 1),
         body: VecDeque::new(),
         pop: HashMap::new(),
-        facing: Heading::Up,
+        facing: Heading::Right,
         size: Coord(w, h),
     };
 
     game.pop.insert(Coord(1, 1), Square::Head);
-    game.pop.insert(Coord(w-2, h-3), Square::Apple);
+    game.pop.insert(Coord(w-2, h-2), Square::Apple);
 
     return game;
 }
@@ -156,7 +161,14 @@ fn print_board(width: usize, height: usize, game: &GameInfo){
                     match game.pop.get(&c){
                         Some(Square::Empty) => sq_char = EMPTY,
                         Some(Square::Body) => sq_char = BODY,
-                        Some(Square::Head) => sq_char = HEAD,
+                        Some(Square::Head) => sq_char = {
+                            match game.facing{
+                                Heading::Left => LEFT,
+                                Heading::Down => DOWN,
+                                Heading::Right => RIGHT,
+                                Heading::Up => UP,
+                            }
+                        },
                         Some(Square::Apple) => sq_char = APPLE,
                         None => sq_char = EMPTY,
                     }
